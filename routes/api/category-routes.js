@@ -1,11 +1,18 @@
 const router = require('express').Router();
+const { includes } = require('lodash');
 const { Category, Product } = require('../../models');
 
 // The `/api/categories` endpoint
 
 router.get('/', async (req, res) => {
   try {
-    const newCategory = await Category.findAll();
+    const Category = await Category.findAll();
+    include: [
+      {
+        model: Product,
+        attrbutes: 'product'
+      },
+    ],
   // find all categories
   // be sure to include its associated Products
     res.status(200).json(newCategory);
@@ -24,6 +31,11 @@ router.post('/', async (req, res) => {
   // create a new category
   try {
     const newCategory = await Category.create(req.body);
+    include: [
+    {  model: Product,
+      attrbutes: ['product']
+      },
+    ],
 
     res.status(200).json(newCategory);
   } catch (err) {
