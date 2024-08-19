@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { includes } = require('lodash');
 const { Category, Product } = require('../../models');
 
+
 // The `/api/categories` endpoint
   // find all categories
   // be sure to include its associated Products
@@ -52,13 +53,39 @@ router.post('/', async (req, res) => {
     res.status(400).json(err);
   }
 });
-
-router.put('/:id', (req, res) => {
   // update a category by its `id` value
+router.put('/:id', async (req, res) => {
+  try { 
+    const [updatedRows] = await Category.update(req.body, {
+    where: {
+      id: req.params.id
+    }
+  });
+  if (updatedRows === 0) {
+    res.status(404).json({message: 'Category does not exist'});
+    return;
+  } const updateCategory = await Category.findByPk(req.params.id);
+  res.status(200).json(updateCategory)
+} catch (err) {
+  res.status(400).json(err)
+}
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
+  try { 
+    const [deleteRows] = await Category.destroy(req.body, {
+    where: {
+      id: req.params.id
+    }
+  });
+  if (deleteRows === 0) {
+    res.status(404).json({message: 'Category doe not exist'});
+    return;
+  } res.status(200).json({message: 'Category has been deleted'})
+} catch (err) {
+  res.status(400).json(err)
+}
 });
 
 module.exports = router;
