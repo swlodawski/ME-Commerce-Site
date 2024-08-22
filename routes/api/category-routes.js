@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { includes } = require('lodash');
 const { Category, Product } = require('../../models');
 
 
@@ -8,11 +7,11 @@ const { Category, Product } = require('../../models');
   // be sure to include its associated Products
 router.get('/', async (req, res) => {
   try {
-    const categoryInfo = await Category.findAll();
+    const categoryInfo = await Category.findAll({
     include: [
       {
-        model: Product},
-    ],
+        model: Product}
+    ]});
 
     res.status(200).json(categoryInfo);
   } catch (err) {
@@ -31,7 +30,7 @@ router.get('/:id', async (req, res) => {
     ]
     });
     if (!categoryInfo) {
-      res.status(404).json({message: 'This category does not esist'});
+      res.status(404).json({message: 'This category does not exist'});
       return;
     }
     res.status(200).json(categoryInfo)
@@ -44,10 +43,6 @@ router.post('/', async (req, res) => {
   // create a new category
   try {
     const newCategory = await Category.create(req.body);
-    include: [
-    {  model: Product},
-    ],
-
     res.status(200).json(newCategory);
   } catch (err) {
     res.status(400).json(err);
