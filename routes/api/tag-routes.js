@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { where } = require('sequelize');
 const { Tag, Product, ProductTag } = require('../../models');
 
 // The `/api/tags` endpoint
@@ -8,7 +7,7 @@ const { Tag, Product, ProductTag } = require('../../models');
 router.get('/', async (req, res) => {
   try {
     const tagData = await Tag.findAll({
-      include: [{model: 'Product'}]
+      include: [{model: Product}]
     });
     res.status(200).json(tagData);
   } catch(err) {
@@ -20,7 +19,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async(req, res) => {
   try {
     const tagData = await Tag.findByPk(req.params.id, {
-      include: [{model: 'Product'}]
+      include: [{model: Product}]
     });
     if (!tagData) {
       res.status(404).json({message: 'This tag does not exist'});
@@ -45,7 +44,7 @@ try {
 router.put('/:id', async (req, res) => {
    try {
     const [updatedRows] = await Tag.update(req.body, {
-      where: {id: req.params.id},
+      where: {id: req.params.id}
     });
     if(updatedRows===0) {
       return res.status(404).json({message: 'This tag does not exist'});
@@ -53,19 +52,17 @@ router.put('/:id', async (req, res) => {
     const updatedTag = await Tag.findByPk(req.params.id);
     res.status(200).json(updatedTag)
    } catch (err) {
-    res.status(500).json(err)
+    res.status(400).json(err)
    }
 });
 
   // delete on tag by its `id` value
 router.delete('/:id', async (req, res) => {
   try {
-    const deleteRows = await Tag.destroy(req.params.id, {
-      where: {
-        id: req.params.id
-      }
+    const deletedRows = await Tag.destroy({
+      where: {id: req.params.id}
     });
-    if (deleteRows===0) {
+    if (deletedRows===0) {
       res.status(404).json({message: 'This tag does not exist'});
       return
     } 
