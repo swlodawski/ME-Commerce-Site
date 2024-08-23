@@ -70,9 +70,9 @@ router.post('/', async (req, res) => {
 });
 
 // update product
-router.put('/:id', async(req, res)=> {
+router.put('/:id', async (req, res)=> {
   try {
-    const [updateCategory] = await Product.update(req.body, {
+    const [updatedRows] = await Product.update(req.body, {
       where: {id: req.params.id},
     });
     if (updatedRows===0) {
@@ -82,7 +82,7 @@ router.put('/:id', async(req, res)=> {
       const productTags = await ProductTag.findAll({
         where: {product_id: req.params.id}
       });
-      const productTagIds = productTags.map(({tag_id}) => {tag_id});
+      const productTagIds = productTags.map(({tag_id}) => tag_id);
       const newProductTags = req.body.tagIds.filter((tag_id) => !productTagIds.includes(tag_id)).map((tag_id)=> {
         return{
           product_id: req.params.id,
@@ -90,31 +90,31 @@ router.put('/:id', async(req, res)=> {
         };
       });
 
-      const productTagsToRemove = ProductTags.filter(({tag_id}) => !req.body.tagIds.includes(tag_id)).map(({id})=>id);
+      const productTagsToRemove = productTags.filter(({tag_id}) => !req.body.tagIds.includes(tag_id)).map(({id})=>id);
       await Promise.all([
         ProductTag.destroy({where: {id: productTagsToRemove}}),
         ProductTag.bulkCreate(newProductTags),
       ]);
     }
     const updatedProduct = await Product.findByPk(req.params.id, {
-      include: [{model: 'Tag', ProductTag}]
+      include: [{model: 'Tag', through: ProductTag}]
     });
     res.json(updatedProduct)
   } catch (err) {
     console.log(err);
-    res.status(400).json(err)
+    res.status(404).json(err)
   }
 });
 
 router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
   try {
-    const deleteRows = await Product.destroy({
+    const deletedRows = await Product.destroy({
       where: {
         id: req.params.id
       }
     });
-    if(deleteRows===0) {
+    if(deletedRows===0) {
       res.status(404).json({message: "This product id does not exist"});
       return;
     }
