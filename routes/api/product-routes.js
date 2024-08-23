@@ -24,14 +24,17 @@ router.get('/:id', async (req, res) => {
   // be sure to include its associated Category and Tag data
   try {
     const productData = await Product.findByPk(req.params.id, {
-      include: [{model: Category}, {model: Tag}]
+      include: [
+        Category, {model: Tag, through: ProductTag}
+      ]
     });
     if (!productData) {
-      
+      res.status(404).json({message: "This product tag does not exist"});
+      return
     }
-    res.status(200).json(productData)
+    res.status(200).json(productData);
   } catch (err) {
-    res.status(404).json({message: 'Product does not exist'});
+    res.status(500).json(err);
   }
 });
 
@@ -44,7 +47,7 @@ router.get('/:id', async (req, res) => {
 //     }
 
 // create new product
-router.post('/', async(req, res) => {
+router.post('/', async (req, res) => {
   try {
     const productData = await Product.create({
       product_name: req.body.product_name,
@@ -63,7 +66,7 @@ router.post('/', async(req, res) => {
      res.status(200).json(productData);
   } catch (err) {
     console.log(err);
-  }
+  } res.status(400).json(err);
 });
 
 // update product

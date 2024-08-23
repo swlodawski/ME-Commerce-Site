@@ -7,33 +7,27 @@ const { Category, Product } = require('../../models');
   // be sure to include its associated Products
 router.get('/', async (req, res) => {
   try {
-    const categoryInfo = await Category.findAll({
-    include: [
-      {
-        model: Product}
-    ]});
+    const categoryData = await Category.findAll({
+    include: [{model: Product}]
+  });
 
-    res.status(200).json(categoryInfo);
+    res.status(200).json(categoryData);
   } catch (err) {
-    res.status (400).json(err);
+    res.status (500).json(err);
   }
 });
   // find one category by its `id` value
   // be sure to include its associated Products
 router.get('/:id', async (req, res) => {
   try {
-    const categoryInfo = await Category.findByPk(req.params.id, {
-      include: [
-        {
-        model: Product
-      }
-    ]
+    const categoryData = await Category.findByPk(req.params.id, {
+      include: [{model: Product}]
     });
-    if (!categoryInfo) {
+    if (!categoryData) {
       res.status(404).json({message: 'This category does not exist'});
       return;
     }
-    res.status(200).json(categoryInfo)
+    res.status(200).json(categoryData)
   } catch (err) {
     res.status(500).json(err);
   }
@@ -69,13 +63,13 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
   try { 
-    const [deleteRows] = await Category.destroy(req.body, {
+    const [deletedRows] = await Category.destroy({
     where: {
       id: req.params.id
     }
   });
-  if (deleteRows === 0) {
-    res.status(404).json({message: 'Category doe not exist'});
+  if (deletedRows === 0) {
+    res.status(404).json({message: 'Category does not exist'});
     return;
   } res.status(200).json({message: 'Category has been deleted'})
 } catch (err) {
